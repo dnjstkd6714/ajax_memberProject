@@ -1,0 +1,158 @@
+<!-- 2018. 8. 8(수) 이원상 -->
+<!DOCTYPE>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+$(document).ready(()=>{
+    // 삭제
+    $('#btn_remove').click(()=>{
+        var ck = [];		
+        console.log(typeof ck);
+        $('.ck:checked').each((index,item)=>{				// ck클래스 중 checked된 것을 가져옴			
+            ck.push($(item).val());					
+        // 체크된 아이템의 값을 ck배열에 삽입
+        });
+        $.ajax({	
+            url:'/member/MemberRemoveController'				// 요청 url
+            ,type:'GET'											// 전송방식 get,post
+            ,dataType:'json'									// 서버로부터 받아올 데이터 형식
+            ,data:{ck:ck}										// 전송할 데이터
+            ,success:(data)=>{									// 데이터 전송 및 요청이 성공시 실행할 함수
+            	console.log('remove success function');
+            	console.log(data);
+            	let deleteId;
+            	$(data).each((index,item)=>{
+            		let deleteId = `${item.id}`;
+            		alert(`${deleteId} 님 삭제`);
+            	});
+                $('#btn_list').trigger('click');
+            }
+            ,error:()=>{
+            	alert('삭제에 실패하였습니다');							// 데이터 전송이 실패하면 실행할 함수
+            }	
+        });
+    });
+ 
+    // 추가
+    $('#btn_add').click(()=>{
+        var id = $('#id').val();
+        var pw = $('#pw').val();
+        var name = $('#name').val();
+        var age = $('#age').val();
+        var gender = $('#gender').val();
+ 
+        $.ajax({
+            url:'/member/MemberAddController'					// 요청 url
+            ,type:'POST'										// 전송방식 get,post
+            ,data:{id:id,pw:pw,name:name,age:age,gender:gender}	// 전송할 데이터
+            ,dataType:'json'									// 서버로부터 받아올 데이터 형식
+            ,success:(data)=>{									// 데이터 전송 및 요청이 성공시 실행할 함수
+                alert(`${data.id} 님 추가`);
+                $('#btn_list').trigger('click');				// trigger메소드는 강제로 이벤트를 발생시킴
+            }
+            ,error:()=>{
+            	alert('등록에 실패하였습니다');							// 데이터 전송이 실패하면 실행할 함수
+            }
+        });
+    });
+    // 수정
+    $('#btn_modify').click(()=>{
+        var id = $('#id').val();
+        var pw = $('#pw').val();
+        var name = $('#name').val();
+        var age = $('#age').val();
+        var gender = $('#gender').val();						
+ 
+        $.ajax({
+            url:'/member/MemberModifyController'				// 요청 url
+            ,type:'POST'										// 전송방식 get,post
+            ,data:{id:id,pw:pw,name:name,age:age,gender:gender}	// 전송할 데이터
+            ,dataType:'json'									// 서버로부터 받아올 데이터 형식
+            ,success:(data)=>{									// 데이터 전송 및 요청이 성공시 실행할 함수
+            	alert(`${data.id} 님 수정`);
+                $('#btn_list').trigger('click');				// trigger메소드는 강제로 이벤트를 발생시킴
+            }
+            ,error:()=>{
+            	alert('수정에 실패하였습니다');							// 데이터 전송이 실패하면 실행할 함수
+            }
+        });
+    });
+    // 목록
+    $('#btn_list').click(()=>{									// 버튼 리스트 클릭시
+        $.ajax({	
+        	url:'/member/MemberListController'					// 요청 url
+            ,type:'get'											// 전송방식 get,post
+            ,dataType:'json'									// 서버로부터 받아올 데이터 형식
+            ,success:(data)=>{ 									// 데이터 전송 및 요청이 성공시 실행할 함수		
+                $('#list').empty();								// 아이디가 #list인 태그를 비움
+                $(data).each((index,item)=>{					// 반복문
+                    $('#list').append('<tr>');					// appen 선택된 선택자 끝에 추가
+                    $('#list').append(`<td><input type='checkbox' class='ck' value='${item.id}' name='ck'></td>`);
+                    $('#list').append(`<td>${item.id}</td>`);
+                    $('#list').append(`<td>${item.pw}</td>`);
+                    $('#list').append(`<td>${item.name}</td>`);
+                    $('#list').append(`<td>${item.age}</td>`);
+                    $('#list').append(`<td>${item.gender}</td>`);
+                    $('#list').append('</tr>');
+                });
+            }
+        	, error :()=>{										// 데이터 전송이 실패하면 실행할 함수
+        		alert('에러');
+        	}
+        });
+    });
+});
+</script>
+</head>
+<body>
+    <table class="table table-striped table-dark">
+        <thead class="thead-dark">
+            <tr>
+                <th>id</th>
+                <th>pw</th>
+                <th>name</th>
+                <th>age</th>
+                <th>gender</th>
+                <th>추가</th>
+                <th>수정</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><input type="text" id="id"></td>
+                <td><input type="password" id="pw"></td>
+                <td><input type="text" id="name"></td>
+                <td><input type="text" id="age"></td>
+                <td>
+                    <select id="gender">
+                        <option value="남">남</option>
+                        <option value="여">여</option>
+                    </select>
+                </td>
+                <td><button class="btn" id="btn_add">add</button></td>
+                <td><button class="btn" id="btn_modify">modify</button></td>
+            </tr>
+        </tbody>
+    </table>
+ 
+    <button id="btn_list">회원리스트</button>
+    <table class="table table-striped table-dark">
+        <thead class="thead-dark">
+            <tr>
+                <th></th>
+                <th>id</th>
+                <th>pw</th>
+                <th>name</th>
+                <th>age</th>
+                <th>gender</th>
+            </tr>
+        </thead>
+        <tbody id="list">
+        </tbody>
+    </table>
+    <button id="btn_remove">remove</button>
+</body>
+</html>
